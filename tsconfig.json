@@ -2,9 +2,15 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "jsx": "react-jsx",
+    "lib": ["ESNext"],
+    "customConditions": ["react-native-strict-api", "react-native"],
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "expo-router/src/*": [
+        "./node_modules/expo-router/build/*"
       ]
     }
   },
@@ -13,5 +19,9 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "app-example"
   ]
 }
