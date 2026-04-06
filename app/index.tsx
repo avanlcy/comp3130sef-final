@@ -1,14 +1,24 @@
-import TopBar from '@/components/TopBar';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 import GetSchoolsButton from '../components/GetSchoolsButton';
+import Pill from '../components/Pill';
 import SchoolItem from '../components/SchoolItem';
+import SearchBar from '../components/SearchBar';
+import TopBar from '../components/TopBar';
+import { colours } from '../constants/colours';
 import { useFavourites } from '../hooks/useFavourites';
 import { useLanguage } from '../hooks/useLanguage';
 import { useSchools } from '../hooks/useSchools';
+import { t } from '../i18n/translations';
 
 type SortField = 'name' | 'district' | 'category';
+
+const SORT_KEYS: { field: SortField; translationKey: 'sortName' | 'sortDistrict' | 'sortCategory' }[] = [
+  { field: 'name', translationKey: 'sortName' },
+  { field: 'district', translationKey: 'sortDistrict' },
+  { field: 'category', translationKey: 'sortCategory' },
+];
 
 const MainPage = () => {
   const router = useRouter();
@@ -19,14 +29,6 @@ const MainPage = () => {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<SortField>('name');
   const [showFavourites, setShowFavourites] = useState(false);
-
-  const isEn = language === 'en';
-
-  const sortOptions: { field: SortField; label: string }[] = [
-    { field: 'name', label: isEn ? 'Name' : '名稱' },
-    { field: 'district', label: isEn ? 'District' : '分區' },
-    { field: 'category', label: isEn ? 'Category' : '類別' },
-  ];
 
   const filteredSchools = useMemo(() => {
     const query = search.toLowerCase();
@@ -42,59 +44,36 @@ const MainPage = () => {
   }, [schools, search, sortBy, showFavourites, isFavourite]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
+    <View style={styles.screen}>
       <TopBar
-        title={isEn ? 'COMP3130SEF School Finder' : 'COMP3130SEF 香港學校'}
+        title={t('appTitle', language)}
         onRightPress={() => router.push('/languageChange')}
-        rightLabel={isEn ? 'ENG' : '中文'}
+        rightLabel={language === 'en' ? t('langEn', language) : t('langZh', language)}
       />
-      {loading && <ActivityIndicator style={{ marginTop: 20 }} size="large" />}
-      {error && <Text style={{ color: 'red', textAlign: 'center', marginTop: 20 }}>{error}</Text>}
+      {loading && <ActivityIndicator style={styles.loader} size="large" />}
+      {error && <Text style={styles.error}>{error}</Text>}
       {schools.length > 0 && (
         <>
-          <TextInput
-            style={{
-              margin: 10,
-              padding: 10,
-              borderWidth: 1,
-              borderColor: '#ccc',
-              borderRadius: 8,
-              fontSize: 16,
-            }}
-            placeholder={isEn ? 'Search schools...' : '搜尋學校...'}
+          <SearchBar
             value={search}
             onChangeText={setSearch}
+            placeholder={t('searchPlaceholder', language)}
           />
-          <View style={{ flexDirection: 'row', paddingHorizontal: 10, gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
-            {sortOptions.map((opt) => (
-              <TouchableOpacity
+          <View style={styles.pillRow}>
+            {SORT_KEYS.map((opt) => (
+              <Pill
                 key={opt.field}
+                label={t(opt.translationKey, language)}
+                active={sortBy === opt.field}
                 onPress={() => setSortBy(opt.field)}
-                style={{
-                  paddingVertical: 6,
-                  paddingHorizontal: 12,
-                  borderRadius: 16,
-                  backgroundColor: sortBy === opt.field ? '#007AFF' : '#eee',
-                }}
-              >
-                <Text style={{ fontSize: 13, color: sortBy === opt.field ? '#fff' : '#333' }}>
-                  {opt.label}
-                </Text>
-              </TouchableOpacity>
+              />
             ))}
-            <TouchableOpacity
+            <Pill
+              label={t('favourites', language)}
+              active={showFavourites}
+              activeColour={colours.orange}
               onPress={() => setShowFavourites((v) => !v)}
-              style={{
-                paddingVertical: 6,
-                paddingHorizontal: 12,
-                borderRadius: 16,
-                backgroundColor: showFavourites ? '#FF9500' : '#eee',
-              }}
-            >
-              <Text style={{ fontSize: 13, color: showFavourites ? '#fff' : '#333' }}>
-                {isEn ? 'Favourites' : '收藏'}
-              </Text>
-            </TouchableOpacity>
+            />
           </View>
           <FlatList
             data={filteredSchools}
@@ -106,20 +85,49 @@ const MainPage = () => {
                 onPress={() => router.push({ pathname: '/schoolDetail', params: item as any })}
               />
             )}
-            style={{ flex: 1 }}
+            style={styles.list}
           />
         </>
       )}
       {!loading && (
-        <View style={{ paddingVertical: 10, paddingBottom: 40 }}>
+        <View style={styles.buttonContainer}>
           <GetSchoolsButton
             onPress={loadSchools}
-            title={isEn ? 'Update Schools' : '更新學校'}
+            title={t('updateSchools', language)}
           />
         </View>
       )}
     </View>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: colours.background,
+  },
+  loader: {
+    marginTop: 20,
+  },
+  error: {
+    color: colours.danger,
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  pillRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 10,
+    gap: 8,
+    marginBottom: 6,
+    flexWrap: 'wrap',
+  },
+  list: {
+    flex: 1,
+  },
+  buttonContainer: {
+    paddingVertical: 10,
+    paddingBottom: 40,
+  },
+});
 
 export default MainPage;

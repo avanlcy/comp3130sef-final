@@ -1,50 +1,68 @@
-import { Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { colours } from '../constants/colours';
 import { School } from '../models/School';
+import Badge from './Badge';
 
 type SchoolItemProps = {
-    school: School;
-    onPress?: () => void;
-    isFavourite?: boolean;
+  school: School;
+  onPress?: () => void;
+  isFavourite?: boolean;
 };
 
 const SchoolItem = ({ school, onPress, isFavourite }: SchoolItemProps) => {
-    return (
-        <TouchableOpacity onPress={onPress} style={{
-            paddingHorizontal: 14,
-            paddingVertical: 12,
-            borderBottomWidth: 1,
-            borderBottomColor: '#ddd',
-            backgroundColor: isFavourite ? '#fff8f0' : '#fff',
-        }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333', flex: 1 }}>{school.name}</Text>
-                {isFavourite && (
-                    <View style={{
-                        backgroundColor: '#FF9500',
-                        paddingVertical: 2,
-                        paddingHorizontal: 8,
-                        borderRadius: 4,
-                    }}>
-                        <Text style={{ fontSize: 10, color: '#fff', fontWeight: '600' }}>FAV</Text>
-                    </View>
-                )}
-            </View>
-            <Text style={{ fontSize: 13, color: '#666', marginTop: 6 }} numberOfLines={2}>
-                {school.address}
-            </Text>
-            <View style={{ flexDirection: 'row', marginTop: 8, gap: 8 }}>
-                <View style={{ backgroundColor: '#e6f0ff', paddingVertical: 3, paddingHorizontal: 8, borderRadius: 4 }}>
-                    <Text style={{ fontSize: 11, color: '#007AFF' }}>{school.district}</Text>
-                </View>
-                <View style={{ backgroundColor: '#f0f0f0', paddingVertical: 3, paddingHorizontal: 8, borderRadius: 4 }}>
-                    <Text style={{ fontSize: 11, color: '#555' }}>{school.schoolLevel}</Text>
-                </View>
-                <View style={{ backgroundColor: '#f0f0f0', paddingVertical: 3, paddingHorizontal: 8, borderRadius: 4 }}>
-                    <Text style={{ fontSize: 11, color: '#555' }}>{school.telephone}</Text>
-                </View>
-            </View>
-        </TouchableOpacity>
-    );
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      style={[styles.container, isFavourite && styles.favouriteContainer]}
+    >
+      <View style={styles.nameRow}>
+        <Text style={styles.name} numberOfLines={2}>{school.name}</Text>
+        {isFavourite && <Badge label="FAV" variant="favourite" />}
+      </View>
+      <Text style={styles.address} numberOfLines={2}>
+        {school.address}
+      </Text>
+      <View style={styles.badgeRow}>
+        <Badge label={school.district} variant="primary" />
+        <Badge label={school.schoolLevel} />
+        <Badge label={school.telephone} />
+      </View>
+    </TouchableOpacity>
+  );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.border,
+    backgroundColor: colours.cardBackground,
+  },
+  favouriteContainer: {
+    backgroundColor: colours.favouriteBackground,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  name: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colours.textPrimary,
+    flex: 1,
+  },
+  address: {
+    fontSize: 13,
+    color: colours.textMuted,
+    marginTop: 6,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    marginTop: 8,
+    gap: 8,
+  },
+});
 
 export default SchoolItem;

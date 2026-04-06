@@ -1,10 +1,12 @@
 import * as Clipboard from 'expo-clipboard';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import TopBar from '../components/TopBar';
+import { colours } from '../constants/colours';
 import { useFavourites } from '../hooks/useFavourites';
 import { useLanguage } from '../hooks/useLanguage';
+import { t } from '../i18n/translations';
 import { School } from '../models/School';
 
 const SchoolDetail = () => {
@@ -12,7 +14,6 @@ const SchoolDetail = () => {
   const { language } = useLanguage();
   const { isFavourite, toggleFavourite } = useFavourites();
   const params = useLocalSearchParams();
-  const isEn = language === 'en';
 
   const school: School = {
     schoolNo: Number(params.schoolNo),
@@ -33,19 +34,21 @@ const SchoolDetail = () => {
   };
 
   const rows: { label: string; value: string }[] = [
-    { label: isEn ? 'School No.' : '學校編號', value: school.schoolNo.toString() },
-    { label: isEn ? 'Category' : '類別', value: school.category },
-    { label: isEn ? 'Address' : '地址', value: school.address },
-    { label: isEn ? 'District' : '分區', value: school.district },
-    { label: isEn ? 'School Level' : '學校類型', value: school.schoolLevel },
-    { label: isEn ? 'Finance Type' : '資助種類', value: school.financeType },
-    { label: isEn ? 'Session' : '授課時間', value: school.session },
-    { label: isEn ? 'Gender' : '學生性別', value: school.gender },
-    { label: isEn ? 'Religion' : '宗教', value: school.religion },
-    { label: isEn ? 'Telephone' : '電話', value: school.telephone },
-    { label: isEn ? 'Fax' : '傳真', value: school.fax },
-    { label: isEn ? 'Website' : '網頁', value: school.website },
+    { label: t('schoolNo', language), value: school.schoolNo.toString() },
+    { label: t('category', language), value: school.category },
+    { label: t('address', language), value: school.address },
+    { label: t('district', language), value: school.district },
+    { label: t('schoolLevel', language), value: school.schoolLevel },
+    { label: t('financeType', language), value: school.financeType },
+    { label: t('session', language), value: school.session },
+    { label: t('gender', language), value: school.gender },
+    { label: t('religion', language), value: school.religion },
+    { label: t('telephone', language), value: school.telephone },
+    { label: t('fax', language), value: school.fax },
+    { label: t('website', language), value: school.website },
   ];
+
+  const favourited = isFavourite(school.schoolNo);
 
   const mapHtml = `
     <!DOCTYPE html>
@@ -67,77 +70,121 @@ const SchoolDetail = () => {
   `;
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.screen}>
       <TopBar
-        title={isEn ? 'Details' : '詳情'}
+        title={t('details', language)}
         onRightPress={() => router.back()}
-        rightLabel={isEn ? 'Back' : '返回'}
+        rightLabel={t('back', language)}
       />
-      <ScrollView style={{ flex: 1, padding: 16 }}>
-        <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 8 }}>
-          {school.name}
-        </Text>
+      <ScrollView style={styles.scrollView}>
+        <Text style={styles.title}>{school.name}</Text>
         <TouchableOpacity
           onPress={() => toggleFavourite(school.schoolNo)}
-          style={{
-            alignSelf: 'flex-start',
-            flexDirection: 'row',
-            alignItems: 'center',
-            paddingVertical: 6,
-            paddingHorizontal: 14,
-            borderRadius: 6,
-            backgroundColor: isFavourite(school.schoolNo) ? '#FF3B30' : '#007AFF',
-            marginBottom: 16,
-          }}
+          style={[styles.favButton, { backgroundColor: favourited ? colours.danger : colours.primary }]}
         >
-          <Text style={{ color: '#fff', fontSize: 14, fontWeight: '600' }}>
-            {isFavourite(school.schoolNo)
-              ? (isEn ? 'Remove from Favourites' : '移除收藏')
-              : (isEn ? 'Add to Favourites' : '加入收藏')}
+          <Text style={styles.favButtonText}>
+            {favourited ? t('removeFromFavourites', language) : t('addToFavourites', language)}
           </Text>
         </TouchableOpacity>
         {rows.map((row) => (
-          <View key={row.label} style={{
-            flexDirection: 'row',
-            paddingVertical: 10,
-            borderBottomWidth: 1,
-            borderBottomColor: '#eee',
-          }}>
-            <Text style={{ fontSize: 14, fontWeight: '600', width: 120, color: '#555' }}>
-              {row.label}
-            </Text>
-            <Text style={{ fontSize: 14, flex: 1 }}>{row.value}</Text>
+          <View key={row.label} style={styles.row}>
+            <Text style={styles.rowLabel}>{row.label}</Text>
+            <Text style={styles.rowValue}>{row.value}</Text>
           </View>
         ))}
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 20, marginBottom: 10 }}>
-          <Text style={{ fontSize: 16, fontWeight: 'bold' }}>
-            {isEn ? 'Location' : '位置'}
-          </Text>
+        <View style={styles.locationHeader}>
+          <Text style={styles.locationTitle}>{t('location', language)}</Text>
           <TouchableOpacity
             onPress={() => {
               Clipboard.setStringAsync(`${school.latitude}, ${school.longitude}`);
-              Alert.alert(isEn ? 'Copied' : '已複製', `${school.latitude}, ${school.longitude}`);
+              Alert.alert(t('copied', language), `${school.latitude}, ${school.longitude}`);
             }}
-            style={{
-              marginLeft: 10,
-              paddingVertical: 4,
-              paddingHorizontal: 10,
-              backgroundColor: '#007AFF',
-              borderRadius: 6,
-            }}
+            style={styles.copyButton}
           >
-            <Text style={{ color: '#fff', fontSize: 12 }}>{isEn ? 'Copy Coords' : '複製座標'}</Text>
+            <Text style={styles.copyButtonText}>{t('copyCoords', language)}</Text>
           </TouchableOpacity>
         </View>
-        <View style={{ height: 450, borderRadius: 8, overflow: 'hidden', marginBottom: 30 }}>
-          <WebView
-            source={{ html: mapHtml }}
-            style={{ flex: 1 }}
-          />
+        <View style={styles.mapContainer}>
+          <WebView source={{ html: mapHtml }} style={styles.map} />
         </View>
       </ScrollView>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+    padding: 16,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  favButton: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 6,
+    marginBottom: 16,
+  },
+  favButtonText: {
+    color: colours.white,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  row: {
+    flexDirection: 'row',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.borderLight,
+  },
+  rowLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    width: 120,
+    color: colours.textSecondary,
+  },
+  rowValue: {
+    fontSize: 14,
+    flex: 1,
+  },
+  locationHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  locationTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  copyButton: {
+    marginLeft: 10,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    backgroundColor: colours.primary,
+    borderRadius: 6,
+  },
+  copyButtonText: {
+    color: colours.white,
+    fontSize: 12,
+  },
+  mapContainer: {
+    height: 450,
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginBottom: 30,
+  },
+  map: {
+    flex: 1,
+  },
+});
 
 export default SchoolDetail;

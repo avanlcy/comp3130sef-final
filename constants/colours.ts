@@ -1,0 +1,18 @@
+export const colours = {
+  primary: '#007AFF',
+  danger: '#FF3B30',
+  orange: '#FF9500',
+  white: '#fff',
+  background: '#f5f5f5',
+  cardBackground: '#fff',
+  favouriteBackground: '#fff8f0',
+  selectedBackground: '#e6f0ff',
+  border: '#ddd',
+  borderLight: '#eee',
+  inputBorder: '#ccc',
+  pillBackground: '#eee',
+  badgeSecondary: '#f0f0f0',
+  textPrimary: '#333',
+  textSecondary: '#555',
+  textMuted: '#666',
+};
