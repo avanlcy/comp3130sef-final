@@ -3,12 +3,14 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import TopBar from '../components/TopBar';
+import { useFavourites } from '../hooks/useFavourites';
 import { useLanguage } from '../hooks/useLanguage';
 import { School } from '../models/School';
 
 const SchoolDetail = () => {
   const router = useRouter();
   const { language } = useLanguage();
+  const { isFavourite, toggleFavourite } = useFavourites();
   const params = useLocalSearchParams();
   const isEn = language === 'en';
 
@@ -72,9 +74,28 @@ const SchoolDetail = () => {
         rightLabel={isEn ? 'Back' : '返回'}
       />
       <ScrollView style={{ flex: 1, padding: 16 }}>
-        <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 16 }}>
+        <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 8 }}>
           {school.name}
         </Text>
+        <TouchableOpacity
+          onPress={() => toggleFavourite(school.schoolNo)}
+          style={{
+            alignSelf: 'flex-start',
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 6,
+            paddingHorizontal: 14,
+            borderRadius: 6,
+            backgroundColor: isFavourite(school.schoolNo) ? '#FF3B30' : '#007AFF',
+            marginBottom: 16,
+          }}
+        >
+          <Text style={{ color: '#fff', fontSize: 14, fontWeight: '600' }}>
+            {isFavourite(school.schoolNo)
+              ? (isEn ? 'Remove from Favourites' : '移除收藏')
+              : (isEn ? 'Add to Favourites' : '加入收藏')}
+          </Text>
+        </TouchableOpacity>
         {rows.map((row) => (
           <View key={row.label} style={{
             flexDirection: 'row',

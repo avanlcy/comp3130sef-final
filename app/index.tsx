@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import GetSchoolsButton from '../components/GetSchoolsButton';
 import SchoolItem from '../components/SchoolItem';
+import { useFavourites } from '../hooks/useFavourites';
 import { useLanguage } from '../hooks/useLanguage';
 import { useSchools } from '../hooks/useSchools';
 
@@ -13,9 +14,11 @@ const MainPage = () => {
   const router = useRouter();
   const { language } = useLanguage();
   const { schools, loading, error, loadSchools } = useSchools(language);
+  const { isFavourite } = useFavourites();
 
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<SortField>('name');
+  const [showFavourites, setShowFavourites] = useState(false);
 
   const isEn = language === 'en';
 
@@ -27,13 +30,16 @@ const MainPage = () => {
 
   const filteredSchools = useMemo(() => {
     const query = search.toLowerCase();
-    const filtered = schools.filter((s) =>
+    let filtered = schools.filter((s) =>
       s.name.toLowerCase().includes(query) ||
       s.district.toLowerCase().includes(query) ||
       s.category.toLowerCase().includes(query)
     );
+    if (showFavourites) {
+      filtered = filtered.filter((s) => isFavourite(s.schoolNo));
+    }
     return filtered.sort((a, b) => a[sortBy].localeCompare(b[sortBy]));
-  }, [schools, search, sortBy]);
+  }, [schools, search, sortBy, showFavourites, isFavourite]);
 
   return (
     <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
@@ -59,7 +65,7 @@ const MainPage = () => {
             value={search}
             onChangeText={setSearch}
           />
-          <View style={{ flexDirection: 'row', paddingHorizontal: 10, gap: 8, marginBottom: 6 }}>
+          <View style={{ flexDirection: 'row', paddingHorizontal: 10, gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
             {sortOptions.map((opt) => (
               <TouchableOpacity
                 key={opt.field}
@@ -76,6 +82,19 @@ const MainPage = () => {
                 </Text>
               </TouchableOpacity>
             ))}
+            <TouchableOpacity
+              onPress={() => setShowFavourites((v) => !v)}
+              style={{
+                paddingVertical: 6,
+                paddingHorizontal: 12,
+                borderRadius: 16,
+                backgroundColor: showFavourites ? '#FF9500' : '#eee',
+              }}
+            >
+              <Text style={{ fontSize: 13, color: showFavourites ? '#fff' : '#333' }}>
+                {isEn ? 'Favourites' : '收藏'}
+              </Text>
+            </TouchableOpacity>
           </View>
           <FlatList
             data={filteredSchools}
@@ -83,6 +102,7 @@ const MainPage = () => {
             renderItem={({ item }) => (
               <SchoolItem
                 school={item}
+                isFavourite={isFavourite(item.schoolNo)}
                 onPress={() => router.push({ pathname: '/schoolDetail', params: item as any })}
               />
             )}

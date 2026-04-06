@@ -4,18 +4,31 @@ import { School } from '../models/School';
 type SchoolItemProps = {
     school: School;
     onPress?: () => void;
+    isFavourite?: boolean;
 };
 
-const SchoolItem = ({ school, onPress }: SchoolItemProps) => {
+const SchoolItem = ({ school, onPress, isFavourite }: SchoolItemProps) => {
     return (
         <TouchableOpacity onPress={onPress} style={{
             paddingHorizontal: 14,
             paddingVertical: 12,
             borderBottomWidth: 1,
             borderBottomColor: '#ddd',
-            backgroundColor: '#fff',
+            backgroundColor: isFavourite ? '#fff8f0' : '#fff',
         }}>
-            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333' }}>{school.name}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333', flex: 1 }}>{school.name}</Text>
+                {isFavourite && (
+                    <View style={{
+                        backgroundColor: '#FF9500',
+                        paddingVertical: 2,
+                        paddingHorizontal: 8,
+                        borderRadius: 4,
+                    }}>
+                        <Text style={{ fontSize: 10, color: '#fff', fontWeight: '600' }}>FAV</Text>
+                    </View>
+                )}
+            </View>
             <Text style={{ fontSize: 13, color: '#666', marginTop: 6 }} numberOfLines={2}>
                 {school.address}
             </Text>
