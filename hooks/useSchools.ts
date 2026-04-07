@@ -36,11 +36,11 @@ export function useSchools(language: Language) {
         }
     }, [language]);
 
-    const loadSchools = async () => {
+    const loadSchools = async (forceRefresh: boolean = false) => {
         setLoading(true);
         setError(null);
         try {
-            const raw = await FetchSchools();
+            const raw = await FetchSchools(forceRefresh);
             rawDataRef.current = raw;
             setSchools(mapSchools(raw, language));
         } catch (err) {

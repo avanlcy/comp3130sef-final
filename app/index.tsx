@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 import GetSchoolsButton from '../components/GetSchoolsButton';
 import Pill from '../components/Pill';
@@ -29,6 +29,10 @@ const MainPage = () => {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<SortField>('name');
   const [showFavourites, setShowFavourites] = useState(false);
+
+  useEffect(() => {
+    loadSchools();
+  }, []);
 
   const filteredSchools = useMemo(() => {
     const query = search.toLowerCase();
@@ -92,7 +96,7 @@ const MainPage = () => {
       {!loading && (
         <View style={styles.buttonContainer}>
           <GetSchoolsButton
-            onPress={loadSchools}
+            onPress={() => loadSchools(true)}
             title={t('updateSchools', language)}
           />
         </View>
